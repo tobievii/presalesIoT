@@ -16,6 +16,10 @@ v5_feature_modules = [
 
 v5_suites = ["CSM Suite", "Utilities Suite", "Assets Suite"]
 
+# Set up session state to track the user's path
+if 'path' not in st.session_state:
+    st.session_state.path = None
+
 # Wizard to guide users through decision tree
 st.set_page_config(page_title="IoT.nxt Deal Qualification Wizard", layout="centered")
 
@@ -31,14 +35,16 @@ if aligned_with_capabilities == "No":
     st.write("The project is not aligned with V3 or V5 capabilities. Consider offering a partner-led or bespoke solution.")
     if st.button("Offer Partner-Led Solution"):
         st.success("Proceed with a Partner-Led Solution!")
+        st.session_state.path = 'partner_solution'
 else:
     # Proceed with V3 or V5 qualification
     project_supported = st.selectbox("Is the project supported in V3 verticals?", ("Yes", "No"))
 
     if project_supported == "No":
-        st.write("V3 doesn't support this project. Consider V5, Platform, or Bespoke.")
-        if st.button("Go to V5/Platform/Bespoke Assessment"):
+        st.write("V3 doesn't support this project. You will now be diverted to the V5/Platform or Bespoke path.")
+        if st.button("Proceed with V5/Bespoke Assessment"):
             st.success("Proceeding with V5 or Bespoke Assessment!")
+            st.session_state.path = 'v5_bespoke'
     else:
         # Let the user choose the supported vertical
         vertical_selection = st.selectbox("Which vertical does the project fall under?", v3_verticals)
@@ -47,8 +53,9 @@ else:
         
         if devices_catalogue == "No":
             st.write("Devices are not supported in V3 catalogue. Consider V5/Bespoke solutions.")
-            if st.button("Go to V5/Bespoke Assessment"):
+            if st.button("Proceed with V5/Bespoke Assessment"):
                 st.success("Proceeding with V5 or Bespoke Assessment!")
+                st.session_state.path = 'v5_bespoke'
         else:
             # Question: Frequency for Devices to Send Data/Telemetry
             telemetry_frequency = st.number_input(
@@ -60,16 +67,25 @@ else:
             if telemetry_frequency > 96:
                 st.write(f"Telemetry frequency exceeds the V3 15-minute block limit ({telemetry_frequency}/day).")
                 st.write("Consider V5 for real-time telemetry support or Bespoke for further customization.")
-                if st.button("Go to V5/Bespoke Assessment"):
+                if st.button("Proceed with V5/Bespoke Assessment"):
                     st.success("Proceeding with V5 (real-time telemetry support) or Bespoke solution!")
+                    st.session_state.path = 'v5_bespoke'
             else:
                 st.write(f"The project is supported in V3 under the '{vertical_selection}' vertical and complies with telemetry constraints.")
                 if st.button("Proceed with V3 Solution"):
                     st.success(f"Proceeding with V3 Solution in the {vertical_selection} vertical!")
+                    st.session_state.path = 'v3_solution'
 
-# Step 2: Customization Requirement Assessment (If project doesn't fit V3)
-if st.session_state.get("next_step"):
-    st.header("Step 2: Customization Requirement Assessment")
+# V3 Path Handling
+if st.session_state.path == 'v3_solution':
+    st.header("V3 Solution Path")
+    st.write("You are proceeding with the V3 solution. This solution fits your telemetry requirements and supported vertical.")
+    st.success("You can complete the project using V3 supported features and capabilities.")
+
+# V5/Bespoke Path Handling
+if st.session_state.path == 'v5_bespoke':
+    st.header("Step 2: V5 or Bespoke Assessment")
+
     customization_required = st.selectbox("Does the project require customization or custom deployment?", ("Yes", "No"))
     
     if customization_required == "Yes":
@@ -77,7 +93,7 @@ if st.session_state.get("next_step"):
         if st.button("Proceed with Bespoke Solution"):
             st.success("Proceeding with Bespoke Solution for custom deployment!")
     else:
-        st.write("Proceed with Solution (Platform).")
+        st.write("Proceed with Solution (Platform) or V5 Product.")
         fixed_features = st.selectbox("Are platform/fixed features available for this project?", ("Yes", "No"))
         
         if fixed_features == "Yes":
@@ -100,7 +116,7 @@ if st.session_state.get("next_step"):
                     st.success("Proceeding with Bespoke Solution!")
 
 # Step 3: Technical Fit Assessment
-if st.session_state.get("product_solution") or st.session_state.get("bespoke_solution"):
+if st.session_state.path in ['v5_bespoke', 'product_solution', 'bespoke_solution']:
     st.header("Step 3: Technical Fit Assessment")
     technical_complexity = st.selectbox("What is the technical complexity of the project?", ("Low", "High"))
     
@@ -114,7 +130,7 @@ if st.session_state.get("product_solution") or st.session_state.get("bespoke_sol
             st.success("Proceeding with bespoke technical fit!")
 
 # Step 4: Financial Feasibility
-if st.session_state.get("technical_fit") or st.session_state.get("bespoke_technical_fit"):
+if st.session_state.path in ['technical_fit', 'bespoke_technical_fit']:
     st.header("Step 4: Financial Feasibility")
     budget = st.selectbox("Does the customer have a clear budget?", ("Yes", "No"))
     
@@ -135,7 +151,7 @@ if st.session_state.get("technical_fit") or st.session_state.get("bespoke_techni
                 st.success("Deal approved. Proceed with the solution!")
 
 # Step 5: Proceed Decision
-if st.session_state.get("proceed_deal"):
+if st.session_state.path == 'proceed_deal':
     st.header("Final Step: Proceed Decision")
     st.write("Congratulations! Based on your answers, you can proceed with the selected solution.")
     st.write("If further evaluation is required, consider revisiting the customization or financial aspects.")
