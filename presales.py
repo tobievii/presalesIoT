@@ -59,9 +59,9 @@ else:
             # Check if the telemetry frequency fits within the V3 15-minute block constraint
             if telemetry_frequency > 96:
                 st.write(f"Telemetry frequency exceeds the V3 15-minute block limit ({telemetry_frequency}/day).")
-                st.write("Consider V5/Bespoke for higher or real-time telemetry frequency.")
+                st.write("Consider V5 for real-time telemetry support or Bespoke for further customization.")
                 if st.button("Go to V5/Bespoke Assessment"):
-                    st.success("Proceeding with V5 or Bespoke Assessment!")
+                    st.success("Proceeding with V5 (real-time telemetry support) or Bespoke solution!")
             else:
                 st.write(f"The project is supported in V3 under the '{vertical_selection}' vertical and complies with telemetry constraints.")
                 if st.button("Proceed with V3 Solution"):
@@ -70,10 +70,10 @@ else:
 # Step 2: Customization Requirement Assessment (If project doesn't fit V3)
 if st.session_state.get("next_step"):
     st.header("Step 2: Customization Requirement Assessment")
-    customization_required = st.selectbox("Does the project require customization?", ("Yes", "No"))
+    customization_required = st.selectbox("Does the project require customization or custom deployment?", ("Yes", "No"))
     
     if customization_required == "Yes":
-        st.write("The project requires full customization. Consider Bespoke solution for custom deployment.")
+        st.write("The project requires full customization or custom deployment. Proceed with a Bespoke solution.")
         if st.button("Proceed with Bespoke Solution"):
             st.success("Proceeding with Bespoke Solution for custom deployment!")
     else:
@@ -95,7 +95,7 @@ if st.session_state.get("next_step"):
                 if st.button("Proceed with Product (V5)"):
                     st.success(f"Proceeding with Product (V5) using the {v5_suite} suite!")
             else:
-                st.write("Requires full customization. Consider Bespoke solution.")
+                st.write("Requires full customization. Proceed with Bespoke solution.")
                 if st.button("Proceed with Bespoke Solution"):
                     st.success("Proceeding with Bespoke Solution!")
 
