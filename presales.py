@@ -21,29 +21,44 @@ st.title("IoT.nxt - Deal Qualification Wizard")
 
 # Step 1: Initial Opportunity Assessment
 st.header("Step 1: Initial Opportunity Assessment")
-project_supported = st.selectbox("Is the project supported in V3 verticals?", ("Yes", "No"))
+st.write("Identify customer needs and check alignment with existing capabilities (V5, V3).")
 
-if project_supported == "No":
-    st.write("V3 doesn't support this project. Consider V5, Platform, or Bespoke.")
-    next_step = st.button("Go to V5/Platform/Bespoke Assessment")
+aligned_with_capabilities = st.selectbox("Is the project aligned with V5 or V3 capabilities?", ("Yes", "No"))
+
+if aligned_with_capabilities == "No":
+    st.write("The project is not aligned with V3 or V5 capabilities. Consider offering a partner-led or bespoke solution.")
+    partner_solution = st.button("Offer Partner-Led Solution")
 else:
-    # Let the user choose the supported vertical
-    vertical_selection = st.selectbox("Which vertical does the project fall under?", v3_verticals)
-    
-    devices_catalogue = st.selectbox("Are the required devices in the current V3 device catalogue?", ("Yes", "No"))
-    
-    if devices_catalogue == "No":
-        st.write("Devices are not supported in V3 catalogue. Consider V5/Bespoke solutions.")
-        next_step = st.button("Go to V5/Bespoke Assessment")
+    # Proceed with V3 or V5 qualification
+    project_supported = st.selectbox("Is the project supported in V3 verticals?", ("Yes", "No"))
+
+    if project_supported == "No":
+        st.write("V3 doesn't support this project. Consider V5, Platform, or Bespoke.")
+        next_step = st.button("Go to V5/Platform/Bespoke Assessment")
     else:
-        telemetry_compliance = st.selectbox("Can the project comply with telemetry constraints (15-minute blocks, real-time events)?", ("Yes", "No"))
+        # Let the user choose the supported vertical
+        vertical_selection = st.selectbox("Which vertical does the project fall under?", v3_verticals)
         
-        if telemetry_compliance == "No":
-            st.write("The project does not comply with telemetry constraints. Consider V5/Bespoke solutions.")
+        devices_catalogue = st.selectbox("Are the required devices in the current V3 device catalogue?", ("Yes", "No"))
+        
+        if devices_catalogue == "No":
+            st.write("Devices are not supported in V3 catalogue. Consider V5/Bespoke solutions.")
             next_step = st.button("Go to V5/Bespoke Assessment")
         else:
-            st.write(f"The project is supported in V3 under the '{vertical_selection}' vertical. Proceed with V3 Solution.")
-            next_step = st.button("Proceed with V3 Solution")
+            # Question: Frequency for Devices to Send Data/Telemetry
+            telemetry_frequency = st.number_input(
+                "How many times per day do the devices send telemetry data?", 
+                min_value=1, max_value=1440, step=1, value=96  # default is 96/day for V3
+            )
+            
+            # Check if the telemetry frequency fits within the V3 15-minute block constraint
+            if telemetry_frequency > 96:
+                st.write(f"Telemetry frequency exceeds the V3 15-minute block limit ({telemetry_frequency}/day).")
+                st.write("Consider V5/Bespoke for higher or real-time telemetry frequency.")
+                next_step = st.button("Go to V5/Bespoke Assessment")
+            else:
+                st.write(f"The project is supported in V3 under the '{vertical_selection}' vertical and complies with telemetry constraints.")
+                next_step = st.button("Proceed with V3 Solution")
 
 # Step 2: Customization Requirement Assessment (If project doesn't fit V3)
 if st.session_state.get("next_step"):
