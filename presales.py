@@ -1,6 +1,6 @@
 import streamlit as st
 
-# Supported V3 Verticals and V5 Feature Modules
+# Supported V3 Verticals, V5 Suites, and V5 Feature Modules
 v3_verticals = [
     "Agriculture", "Smart Buildings", "Cold Chain Monitoring", "CCTV Integration",
     "Geo-Fencing", "HVAC Control and Integration", "LPR Cameras", "Personnel Tracking (RFID)",
@@ -13,6 +13,8 @@ v5_feature_modules = [
     "Automation & Control", "Reporting", "AI Analytics", "Maintenance & Dispatch",
     "Documentation Management", "AI Assistant", "Integration Components"
 ]
+
+v5_suites = ["CSM Suite", "Utilities Suite", "Assets Suite"]
 
 # Wizard to guide users through decision tree
 st.set_page_config(page_title="IoT.nxt Deal Qualification Wizard", layout="centered")
@@ -27,14 +29,16 @@ aligned_with_capabilities = st.selectbox("Is the project aligned with V5 or V3 c
 
 if aligned_with_capabilities == "No":
     st.write("The project is not aligned with V3 or V5 capabilities. Consider offering a partner-led or bespoke solution.")
-    partner_solution = st.button("Offer Partner-Led Solution")
+    if st.button("Offer Partner-Led Solution"):
+        st.success("Proceed with a Partner-Led Solution!")
 else:
     # Proceed with V3 or V5 qualification
     project_supported = st.selectbox("Is the project supported in V3 verticals?", ("Yes", "No"))
 
     if project_supported == "No":
         st.write("V3 doesn't support this project. Consider V5, Platform, or Bespoke.")
-        next_step = st.button("Go to V5/Platform/Bespoke Assessment")
+        if st.button("Go to V5/Platform/Bespoke Assessment"):
+            st.success("Proceeding with V5 or Bespoke Assessment!")
     else:
         # Let the user choose the supported vertical
         vertical_selection = st.selectbox("Which vertical does the project fall under?", v3_verticals)
@@ -43,7 +47,8 @@ else:
         
         if devices_catalogue == "No":
             st.write("Devices are not supported in V3 catalogue. Consider V5/Bespoke solutions.")
-            next_step = st.button("Go to V5/Bespoke Assessment")
+            if st.button("Go to V5/Bespoke Assessment"):
+                st.success("Proceeding with V5 or Bespoke Assessment!")
         else:
             # Question: Frequency for Devices to Send Data/Telemetry
             telemetry_frequency = st.number_input(
@@ -55,10 +60,12 @@ else:
             if telemetry_frequency > 96:
                 st.write(f"Telemetry frequency exceeds the V3 15-minute block limit ({telemetry_frequency}/day).")
                 st.write("Consider V5/Bespoke for higher or real-time telemetry frequency.")
-                next_step = st.button("Go to V5/Bespoke Assessment")
+                if st.button("Go to V5/Bespoke Assessment"):
+                    st.success("Proceeding with V5 or Bespoke Assessment!")
             else:
                 st.write(f"The project is supported in V3 under the '{vertical_selection}' vertical and complies with telemetry constraints.")
-                next_step = st.button("Proceed with V3 Solution")
+                if st.button("Proceed with V3 Solution"):
+                    st.success(f"Proceeding with V3 Solution in the {vertical_selection} vertical!")
 
 # Step 2: Customization Requirement Assessment (If project doesn't fit V3)
 if st.session_state.get("next_step"):
@@ -66,26 +73,31 @@ if st.session_state.get("next_step"):
     customization_required = st.selectbox("Does the project require customization?", ("Yes", "No"))
     
     if customization_required == "Yes":
-        st.write("The project requires full customization. Consider Bespoke solution.")
-        custom_solution = st.button("Proceed with Bespoke Solution")
+        st.write("The project requires full customization. Consider Bespoke solution for custom deployment.")
+        if st.button("Proceed with Bespoke Solution"):
+            st.success("Proceeding with Bespoke Solution for custom deployment!")
     else:
         st.write("Proceed with Solution (Platform).")
         fixed_features = st.selectbox("Are platform/fixed features available for this project?", ("Yes", "No"))
         
         if fixed_features == "Yes":
             st.write("The project fits the Solution (Platform). Proceed with Platform Solution.")
-            platform_solution = st.button("Proceed with Platform Solution")
+            if st.button("Proceed with Platform Solution"):
+                st.success("Proceeding with Platform Solution!")
         else:
             # Check for V5 feature module
             st.write("Platform does not support this. Consider Product (V5) or Bespoke.")
             feature_module = st.selectbox("Does the project fit one of the V5 feature modules?", v5_feature_modules)
             
             if feature_module:
-                st.write(f"The project fits the V5 feature module '{feature_module}'. Proceed with V5 Product Solution.")
-                product_solution = st.button("Proceed with Product (V5)")
+                v5_suite = st.selectbox("Which V5 suite will you use?", v5_suites)
+                st.write(f"The project fits the V5 feature module '{feature_module}' and will use the '{v5_suite}' suite.")
+                if st.button("Proceed with Product (V5)"):
+                    st.success(f"Proceeding with Product (V5) using the {v5_suite} suite!")
             else:
                 st.write("Requires full customization. Consider Bespoke solution.")
-                bespoke_solution = st.button("Proceed with Bespoke Solution")
+                if st.button("Proceed with Bespoke Solution"):
+                    st.success("Proceeding with Bespoke Solution!")
 
 # Step 3: Technical Fit Assessment
 if st.session_state.get("product_solution") or st.session_state.get("bespoke_solution"):
@@ -94,10 +106,12 @@ if st.session_state.get("product_solution") or st.session_state.get("bespoke_sol
     
     if technical_complexity == "Low":
         st.write("Low complexity, proceed with Platform/Product solution.")
-        technical_fit = st.button("Proceed with Technical Fit")
+        if st.button("Proceed with Technical Fit"):
+            st.success("Proceeding with Platform/Product technical fit!")
     else:
         st.write("High complexity, bespoke deployment required.")
-        bespoke_technical_fit = st.button("Proceed with Bespoke Technical Fit")
+        if st.button("Proceed with Bespoke Technical Fit"):
+            st.success("Proceeding with bespoke technical fit!")
 
 # Step 4: Financial Feasibility
 if st.session_state.get("technical_fit") or st.session_state.get("bespoke_technical_fit"):
@@ -106,21 +120,25 @@ if st.session_state.get("technical_fit") or st.session_state.get("bespoke_techni
     
     if budget == "No":
         st.write("Customer has no clear budget. Defer project or recommend partner solution.")
-        defer_project = st.button("Defer Project or Recommend Partner")
+        if st.button("Defer Project or Recommend Partner"):
+            st.warning("Defer the project or offer partner solution.")
     else:
         roi = st.selectbox("Is there a clear ROI within 2-3 years?", ("Yes", "No"))
         
         if roi == "No":
             st.write("Project ROI is not clear. Defer project.")
-            defer_roi_project = st.button("Defer Project")
+            if st.button("Defer Project"):
+                st.warning("Project deferred due to unclear ROI.")
         else:
             st.write("Proceed with the deal based on ROI and Budget.")
-            proceed_deal = st.button("Proceed with Deal")
+            if st.button("Proceed with Deal"):
+                st.success("Deal approved. Proceed with the solution!")
 
 # Step 5: Proceed Decision
 if st.session_state.get("proceed_deal"):
     st.header("Final Step: Proceed Decision")
     st.write("Congratulations! Based on your answers, you can proceed with the selected solution.")
     st.write("If further evaluation is required, consider revisiting the customization or financial aspects.")
-    st.button("Complete the Wizard")
-
+    if st.button("Complete the Wizard"):
+        st.balloons()
+        st.success("You have completed the wizard and can proceed with the next steps.")
