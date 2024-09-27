@@ -12,7 +12,7 @@ class Step(Enum):
     V5_QUALIFICATION = 7
     BESPOKE_QUALIFICATION = 8
     FINANCIAL_FEASIBILITY = 9
-    RESULT = 10
+    RESULT = 10 
 
 # Initialize session state for navigation and responses
 if 'current_step' not in st.session_state:
