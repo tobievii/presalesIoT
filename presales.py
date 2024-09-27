@@ -12,7 +12,7 @@ class Step(Enum):
     V5_QUALIFICATION = 7
     BESPOKE_QUALIFICATION = 8
     FINANCIAL_FEASIBILITY = 9
-    RESULT = 10 
+    RESULT = 10
 
 # Initialize session state for navigation and responses
 if 'current_step' not in st.session_state:
@@ -22,6 +22,7 @@ if 'responses' not in st.session_state:
 
 # Function to move to the next step
 def next_step():
+    # Ensure the decision-making process works as expected based on input
     if st.session_state.current_step == Step.OPPORTUNITY_ASSESSMENT:
         if st.session_state.responses.get('v3_vertical') == 'Yes':
             st.session_state.current_step = Step.V3_QUALIFICATION
@@ -37,6 +38,8 @@ def next_step():
             st.session_state.current_step = Step.COLD_CHAIN
         elif v3_vertical_type == "Waste Management":
             st.session_state.current_step = Step.WASTE_MANAGEMENT
+        else:
+            st.write("Please select a vertical.")
     elif st.session_state.current_step == Step.SMART_BUILDINGS:
         st.session_state.current_step = Step.RESULT
     elif st.session_state.current_step == Step.ASSET_MANAGEMENT:
