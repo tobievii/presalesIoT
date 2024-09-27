@@ -57,6 +57,7 @@ def next_step():
 
 # Function to move to the previous step
 def previous_step():
+    # Prevent going before the first step
     if st.session_state.current_step != Step.OPPORTUNITY_ASSESSMENT:
         st.session_state.current_step = Step(int(st.session_state.current_step.value) - 1)
 
