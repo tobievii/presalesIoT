@@ -81,26 +81,26 @@ def render_opportunity_assessment():
 # Step 2: V3 Qualification Process
 def render_v3_qualification():
     st.title("V3 Qualification")
-    
+
     # Check and debug what session state holds
     st.write("V3 Qualification Debug: ", st.session_state.responses)
 
     # Ensure that the value exists in the session state or initialize it
     if 'v3_vertical_type' not in st.session_state.responses:
-        st.session_state.responses['v3_vertical_type'] = ""
-    
-    # Render the dropdown for vertical selection with an empty string as the default
+        st.session_state.responses['v3_vertical_type'] = ""  # Initialize as empty
+
+    # Render the dropdown for vertical selection with a placeholder value
     st.session_state.responses['v3_vertical_type'] = st.selectbox(
         "Select Supported Vertical", 
-        ["", "Smart Buildings", "Asset Management", "Utilities", "Cold Chain Monitoring", "Waste Management"],
-        index=0  # Ensuring that an empty option shows up first
+        ["Select", "Smart Buildings", "Asset Management", "Utilities", "Cold Chain Monitoring", "Waste Management"],
+        index=0
     )
-    
+
     # Add a log for the value selected
     st.write(f"Selected vertical: {st.session_state.responses['v3_vertical_type']}")
 
-    # Force a warning if no valid option is selected
-    if st.session_state.responses['v3_vertical_type'] == "":
+    # Add a warning if the user has not selected a valid vertical
+    if st.session_state.responses['v3_vertical_type'] == "Select":
         st.warning("Please select a vertical before proceeding.")
 
 # Step 3: Smart Buildings Qualification
