@@ -39,7 +39,7 @@ def next_step():
         elif v3_vertical_type == "Waste Management":
             st.session_state.current_step = Step.WASTE_MANAGEMENT
         else:
-            st.write("Please select a vertical.")
+            st.write("Please select a vertical.")  # Ensure user selects a valid vertical
     elif st.session_state.current_step == Step.SMART_BUILDINGS:
         st.session_state.current_step = Step.RESULT
     elif st.session_state.current_step == Step.ASSET_MANAGEMENT:
@@ -81,6 +81,15 @@ def render_opportunity_assessment():
 # Step 2: V3 Qualification Process
 def render_v3_qualification():
     st.title("V3 Qualification")
+    
+    # Add a debug print to ensure this function is being called
+    st.write("V3 Qualification: Selecting supported vertical...")
+    
+    # If the value isn't set, initialize it to a default or empty value
+    if 'v3_vertical_type' not in st.session_state.responses:
+        st.session_state.responses['v3_vertical_type'] = None
+    
+    # Render the dropdown for vertical selection
     st.session_state.responses['v3_vertical_type'] = st.selectbox(
         "Select Supported Vertical", 
         ["Smart Buildings", "Asset Management", "Utilities", "Cold Chain Monitoring", "Waste Management"]
@@ -115,105 +124,6 @@ def render_smart_buildings():
         else:
             st.write("Proceed with BMS/HVAC control.")
 
-# Step 4: Asset Management
-def render_asset_management():
-    st.title("Asset Management Qualification")
-    st.session_state.responses['asset_management'] = st.radio(
-        "Does the project require asset management (predictive maintenance, asset utilization)?",
-        ('Yes', 'No')
-    )
-    if st.session_state.responses['asset_management'] == 'Yes':
-        st.session_state.responses['asset_telemetry'] = st.radio(
-            "Does the project require telemetry below 15-minute intervals?",
-            ('Yes', 'No')
-        )
-        if st.session_state.responses['asset_telemetry'] == 'Yes':
-            st.write("Decline Project: Cannot support real-time telemetry.")
-        else:
-            st.write("Proceed with asset management support.")
-
-# Step 5: Cold Chain Monitoring
-def render_cold_chain():
-    st.title("Cold Chain Monitoring")
-    st.session_state.responses['cold_chain'] = st.radio(
-        "Does the project involve cold chain monitoring?",
-        ('Yes', 'No')
-    )
-    if st.session_state.responses['cold_chain'] == 'Yes':
-        st.write("Proceed with cold chain monitoring support.")
-    else:
-        st.write("Decline Project.")
-
-# Step 6: Waste Management
-def render_waste_management():
-    st.title("Waste Management")
-    st.session_state.responses['waste_management'] = st.radio(
-        "Does the project involve waste bin monitoring?",
-        ('Yes', 'No')
-    )
-    if st.session_state.responses['waste_management'] == 'Yes':
-        st.session_state.responses['waste_bins'] = st.radio(
-            "Does the project involve between 1000 and 10000 waste bins?",
-            ('Yes', 'No')
-        )
-        if st.session_state.responses['waste_bins'] == 'Yes':
-            st.write("Proceed with waste bin monitoring support.")
-        else:
-            st.write("Decline Project.")
-
-# Step 7: V5 Qualification
-def render_v5_qualification():
-    st.title("V5 Qualification")
-    st.session_state.responses['v5_customization'] = st.radio(
-        "Does the project require customization?",
-        ('Yes', 'No')
-    )
-    if st.session_state.responses['v5_customization'] == 'Yes':
-        st.write("Proceed with Bespoke solution.")
-    else:
-        st.session_state.responses['v5_roadmap'] = st.radio(
-            "Is the project aligned with the product roadmap for V5?",
-            ('Yes', 'No')
-        )
-        if st.session_state.responses['v5_roadmap'] == 'Yes':
-            st.write("Proceed with V5 product.")
-        else:
-            st.write("Check if it fits within Platform solution.")
-
-# Step 8: Bespoke Solution Qualification
-def render_bespoke_qualification():
-    st.title("Bespoke Solution Qualification")
-    st.session_state.responses['bespoke_complexity'] = st.radio(
-        "What is the technical complexity of the project?",
-        ('Low', 'High')
-    )
-    if st.session_state.responses['bespoke_complexity'] == 'High':
-        st.write("Proceed with Bespoke solution.")
-    else:
-        st.write("Proceed with Platform/Product.")
-
-# Step 9: Financial Feasibility
-def render_financial_feasibility():
-    st.title("Financial Feasibility")
-    st.session_state.responses['budget'] = st.radio(
-        "Does the project have a clear budget and ROI within 2-3 years?",
-        ('Yes', 'No')
-    )
-    st.session_state.responses['strategic_value'] = st.radio(
-        "Is there long-term strategic value?",
-        ('Yes', 'No')
-    )
-    if st.session_state.responses['budget'] == 'Yes' and st.session_state.responses['strategic_value'] == 'Yes':
-        st.write("Proceed with the deal.")
-    else:
-        st.write("Decline Project.")
-
-# Step 10: Final Result
-def render_final_result():
-    st.title("Final Decision")
-    st.write("Final Decision: Based on your input, the project classification is complete.")
-    st.write(st.session_state.responses)  # Show summary of all responses
-
 # Main Application Flow
 def main():
     st.sidebar.title("Deal Qualification Wizard")
@@ -228,21 +138,8 @@ def main():
         render_v3_qualification()
     elif st.session_state.current_step == Step.SMART_BUILDINGS:
         render_smart_buildings()
-    elif st.session_state.current_step == Step.ASSET_MANAGEMENT:
-        render_asset_management()
-    elif st.session_state.current_step == Step.COLD_CHAIN:
-        render_cold_chain()
-    elif st.session_state.current_step == Step.WASTE_MANAGEMENT:
-        render_waste_management()
-    elif st.session_state.current_step == Step.V5_QUALIFICATION:
-        render_v5_qualification()
-    elif st.session_state.current_step == Step.BESPOKE_QUALIFICATION:
-        render_bespoke_qualification()
-    elif st.session_state.current_step == Step.FINANCIAL_FEASIBILITY:
-        render_financial_feasibility()
-    elif st.session_state.current_step == Step.RESULT:
-        render_final_result()
-
+    
+    # Navigation buttons
     render_navigation()
 
 if __name__ == "__main__":
