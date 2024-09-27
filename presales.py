@@ -1,45 +1,37 @@
 import streamlit as st
-from enum import Enum
 
 # Enum for each step in the wizard
-class Step(Enum):
-    OPPORTUNITY_ASSESSMENT = 1
-    V3_QUALIFICATION = 2
-    SMART_BUILDINGS = 3
-    ASSET_MANAGEMENT = 4
-    COLD_CHAIN = 5
-    WASTE_MANAGEMENT = 6
-    V5_QUALIFICATION = 7
-    BESPOKE_QUALIFICATION = 8
-    FINANCIAL_FEASIBILITY = 9
-    RESULT = 10
+class Step:
+    OPPORTUNITY_ASSESSMENT = "Opportunity Assessment"
+    V3_QUALIFICATION = "V3 Qualification"
+    SMART_BUILDINGS = "Smart Buildings"
+    ASSET_MANAGEMENT = "Asset Management"
+    COLD_CHAIN = "Cold Chain Monitoring"
+    WASTE_MANAGEMENT = "Waste Management"
+    V5_QUALIFICATION = "V5 Qualification"
+    BESPOKE_QUALIFICATION = "Bespoke Qualification"
+    FINANCIAL_FEASIBILITY = "Financial Feasibility"
+    RESULT = "Result"
 
 # Initialize session state for navigation and responses
 if 'current_step' not in st.session_state:
     st.session_state.current_step = Step.OPPORTUNITY_ASSESSMENT
-if 'responses' not in st.session_state:
-    st.session_state.responses = {}
 
-# Function to move to the next step
 def next_step():
     if st.session_state.current_step == Step.OPPORTUNITY_ASSESSMENT:
-        if st.session_state.responses.get('v3_vertical') == 'Yes':
+        if st.session_state.v3_supported == 'Yes':
             st.session_state.current_step = Step.V3_QUALIFICATION
         else:
             st.session_state.current_step = Step.V5_QUALIFICATION
     elif st.session_state.current_step == Step.V3_QUALIFICATION:
-        v3_vertical_type = st.session_state.responses.get('v3_vertical_type', "")
-        if v3_vertical_type in ["Smart Buildings", "Asset Management", "Cold Chain Monitoring", "Waste Management"]:
-            if v3_vertical_type == "Smart Buildings":
-                st.session_state.current_step = Step.SMART_BUILDINGS
-            elif v3_vertical_type == "Asset Management":
-                st.session_state.current_step = Step.ASSET_MANAGEMENT
-            elif v3_vertical_type == "Cold Chain Monitoring":
-                st.session_state.current_step = Step.COLD_CHAIN
-            elif v3_vertical_type == "Waste Management":
-                st.session_state.current_step = Step.WASTE_MANAGEMENT
-        else:
-            st.warning("Please select a vertical.")
+        if st.session_state.v3_vertical == "Smart Buildings":
+            st.session_state.current_step = Step.SMART_BUILDINGS
+        elif st.session_state.v3_vertical == "Asset Management":
+            st.session_state.current_step = Step.ASSET_MANAGEMENT
+        elif st.session_state.v3_vertical == "Cold Chain Monitoring":
+            st.session_state.current_step = Step.COLD_CHAIN
+        elif st.session_state.v3_vertical == "Waste Management":
+            st.session_state.current_step = Step.WASTE_MANAGEMENT
     elif st.session_state.current_step == Step.SMART_BUILDINGS:
         st.session_state.current_step = Step.RESULT
     elif st.session_state.current_step == Step.ASSET_MANAGEMENT:
@@ -55,100 +47,74 @@ def next_step():
     elif st.session_state.current_step == Step.FINANCIAL_FEASIBILITY:
         st.session_state.current_step = Step.RESULT
 
-# Function to move to the previous step
 def previous_step():
-    if st.session_state.current_step != Step.OPPORTUNITY_ASSESSMENT:
-        st.session_state.current_step = Step(int(st.session_state.current_step.value) - 1)
+    if st.session_state.current_step == Step.V3_QUALIFICATION:
+        st.session_state.current_step = Step.OPPORTUNITY_ASSESSMENT
+    elif st.session_state.current_step in [
+        Step.SMART_BUILDINGS, Step.ASSET_MANAGEMENT, Step.COLD_CHAIN, Step.WASTE_MANAGEMENT]:
+        st.session_state.current_step = Step.V3_QUALIFICATION
+    elif st.session_state.current_step == Step.V5_QUALIFICATION:
+        st.session_state.current_step = Step.OPPORTUNITY_ASSESSMENT
+    elif st.session_state.current_step == Step.BESPOKE_QUALIFICATION:
+        st.session_state.current_step = Step.V5_QUALIFICATION
+    elif st.session_state.current_step == Step.FINANCIAL_FEASIBILITY:
+        st.session_state.current_step = Step.BESPOKE_QUALIFICATION
 
-# UI for progress bar and navigation buttons
-def render_navigation():
-    col1, col2 = st.columns([1, 3])
-    with col1:
-        if st.session_state.current_step != Step.OPPORTUNITY_ASSESSMENT:
-            st.button("Previous", on_click=previous_step)
-    with col2:
-        if st.session_state.current_step != Step.RESULT:
-            st.button("Next", on_click=next_step)
-
-# Step 1: Initial Opportunity Assessment
+# Render the opportunity assessment step
 def render_opportunity_assessment():
     st.title("Opportunity Assessment")
-    st.session_state.responses['v3_vertical'] = st.radio(
+    st.session_state.v3_supported = st.radio(
         "Is the project supported in V3 verticals?",
         ('Yes', 'No')
     )
+    st.button("Next", on_click=next_step)
 
-# Step 2: V3 Qualification Process
+# Render the V3 Qualification Step
 def render_v3_qualification():
     st.title("V3 Qualification")
-
-    # Check and debug what session state holds
-    st.write("V3 Qualification Debug: ", st.session_state.responses)
-
-    # Ensure that the value exists in the session state or initialize it
-    if 'v3_vertical_type' not in st.session_state.responses:
-        st.session_state.responses['v3_vertical_type'] = ""  # Initialize as empty
-
-    # Render the dropdown for vertical selection with a placeholder value
-    st.session_state.responses['v3_vertical_type'] = st.selectbox(
+    st.session_state.v3_vertical = st.selectbox(
         "Select Supported Vertical", 
-        ["Select", "Smart Buildings", "Asset Management", "Utilities", "Cold Chain Monitoring", "Waste Management"],
-        index=0
+        ["Smart Buildings", "Asset Management", "Utilities", "Cold Chain Monitoring", "Waste Management"]
     )
+    st.button("Next", on_click=next_step)
+    st.button("Previous", on_click=previous_step)
 
-    # Add a log for the value selected
-    st.write(f"Selected vertical: {st.session_state.responses['v3_vertical_type']}")
-
-    # Add a warning if the user has not selected a valid vertical
-    if st.session_state.responses['v3_vertical_type'] == "Select":
-        st.warning("Please select a vertical before proceeding.")
-
-# Step 3: Smart Buildings Qualification
+# Render the Smart Buildings qualification step
 def render_smart_buildings():
     st.title("Smart Buildings Qualification")
-    st.session_state.responses['bms_hvac'] = st.radio(
+    st.session_state.bms_hvac = st.radio(
         "Does the project involve BMS/HVAC integration?",
         ('Yes', 'No')
     )
-    if st.session_state.responses['bms_hvac'] == 'No':
-        st.session_state.responses['occupancy_tracking'] = st.radio(
-            "Does the project involve occupancy tracking?",
-            ('Yes', 'No')
-        )
-        if st.session_state.responses['occupancy_tracking'] == 'Yes':
-            st.session_state.responses['camera_based'] = st.radio(
-                "Is the project using cameras for occupancy tracking?",
-                ('Yes', 'No')
-            )
-            if st.session_state.responses['camera_based'] == 'Yes':
-                st.session_state.responses['camera_accuracy'] = st.radio(
-                    "Does the camera have 99% accuracy?",
-                    ('Yes', 'No')
-                )
-                if st.session_state.responses['camera_accuracy'] == 'No':
-                    st.write("Recommend using 3D Milesight sensors.")
-            else:
-                st.write("Proceed with standard occupancy tracking.")
-        else:
-            st.write("Proceed with BMS/HVAC control.")
+    st.button("Next", on_click=next_step)
+    st.button("Previous", on_click=previous_step)
 
-# Main Application Flow
+# Render the Asset Management qualification step
+def render_asset_management():
+    st.title("Asset Management Qualification")
+    st.session_state.asset_management = st.radio(
+        "Does the project require asset management?",
+        ('Yes', 'No')
+    )
+    st.button("Next", on_click=next_step)
+    st.button("Previous", on_click=previous_step)
+
+# Main Application Logic
 def main():
     st.sidebar.title("Deal Qualification Wizard")
-    
-    # Display current step
-    st.sidebar.write(f"Current step: {st.session_state.current_step.name}")
-    
-    # Render appropriate UI for each step
-    if st.session_state.current_step == Step.OPPORTUNITY_ASSESSMENT:
+    current_step = st.session_state.current_step
+    st.sidebar.write(f"Current step: {current_step}")
+
+    # Control the flow based on the current step
+    if current_step == Step.OPPORTUNITY_ASSESSMENT:
         render_opportunity_assessment()
-    elif st.session_state.current_step == Step.V3_QUALIFICATION:
+    elif current_step == Step.V3_QUALIFICATION:
         render_v3_qualification()
-    elif st.session_state.current_step == Step.SMART_BUILDINGS:
+    elif current_step == Step.SMART_BUILDINGS:
         render_smart_buildings()
-    
-    # Navigation buttons
-    render_navigation()
+    elif current_step == Step.ASSET_MANAGEMENT:
+        render_asset_management()
+    # Add other steps here as necessary
 
 if __name__ == "__main__":
     main()
