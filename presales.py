@@ -22,7 +22,6 @@ if 'responses' not in st.session_state:
 
 # Function to move to the next step
 def next_step():
-    # Ensure the decision-making process works as expected based on input
     if st.session_state.current_step == Step.OPPORTUNITY_ASSESSMENT:
         if st.session_state.responses.get('v3_vertical') == 'Yes':
             st.session_state.current_step = Step.V3_QUALIFICATION
@@ -30,16 +29,17 @@ def next_step():
             st.session_state.current_step = Step.V5_QUALIFICATION
     elif st.session_state.current_step == Step.V3_QUALIFICATION:
         v3_vertical_type = st.session_state.responses.get('v3_vertical_type')
-        if v3_vertical_type == "Smart Buildings":
-            st.session_state.current_step = Step.SMART_BUILDINGS
-        elif v3_vertical_type == "Asset Management":
-            st.session_state.current_step = Step.ASSET_MANAGEMENT
-        elif v3_vertical_type == "Cold Chain Monitoring":
-            st.session_state.current_step = Step.COLD_CHAIN
-        elif v3_vertical_type == "Waste Management":
-            st.session_state.current_step = Step.WASTE_MANAGEMENT
+        if v3_vertical_type in ["Smart Buildings", "Asset Management", "Cold Chain Monitoring", "Waste Management"]:
+            if v3_vertical_type == "Smart Buildings":
+                st.session_state.current_step = Step.SMART_BUILDINGS
+            elif v3_vertical_type == "Asset Management":
+                st.session_state.current_step = Step.ASSET_MANAGEMENT
+            elif v3_vertical_type == "Cold Chain Monitoring":
+                st.session_state.current_step = Step.COLD_CHAIN
+            elif v3_vertical_type == "Waste Management":
+                st.session_state.current_step = Step.WASTE_MANAGEMENT
         else:
-            st.write("Please select a vertical.")  # Ensure user selects a valid vertical
+            st.warning("Please select a vertical.")
     elif st.session_state.current_step == Step.SMART_BUILDINGS:
         st.session_state.current_step = Step.RESULT
     elif st.session_state.current_step == Step.ASSET_MANAGEMENT:
@@ -57,7 +57,6 @@ def next_step():
 
 # Function to move to the previous step
 def previous_step():
-    # Prevent going before the first step
     if st.session_state.current_step != Step.OPPORTUNITY_ASSESSMENT:
         st.session_state.current_step = Step(int(st.session_state.current_step.value) - 1)
 
@@ -86,15 +85,19 @@ def render_v3_qualification():
     # Add a debug print to ensure this function is being called
     st.write("V3 Qualification: Selecting supported vertical...")
     
-    # If the value isn't set, initialize it to a default or empty value
+    # Ensure that the value exists in the session state, or initialize it
     if 'v3_vertical_type' not in st.session_state.responses:
-        st.session_state.responses['v3_vertical_type'] = None
-    
-    # Render the dropdown for vertical selection
+        st.session_state.responses['v3_vertical_type'] = ""
+
+    # Render the dropdown for vertical selection and store the selected option in session state
     st.session_state.responses['v3_vertical_type'] = st.selectbox(
         "Select Supported Vertical", 
-        ["Smart Buildings", "Asset Management", "Utilities", "Cold Chain Monitoring", "Waste Management"]
+        ["", "Smart Buildings", "Asset Management", "Utilities", "Cold Chain Monitoring", "Waste Management"]
     )
+
+    # Inform user to make a selection if it's empty
+    if st.session_state.responses['v3_vertical_type'] == "":
+        st.warning("Please select a vertical before proceeding.")
 
 # Step 3: Smart Buildings Qualification
 def render_smart_buildings():
